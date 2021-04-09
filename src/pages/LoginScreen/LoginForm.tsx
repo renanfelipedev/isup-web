@@ -1,26 +1,38 @@
 import { useState } from 'react';
 import { ArrowForwardIcon } from '@chakra-ui/icons';
-import { Button, FormControl, FormLabel, Input, Stack } from '@chakra-ui/react';
+import {
+  Button,
+  FormControl,
+  FormLabel,
+  Alert,
+  Input,
+  Stack,
+} from '@chakra-ui/react';
 
-import { api } from '../../services/api';
+import { useAuth } from '../../hooks/auth';
 
 export const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [token, setToken] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  const { signIn } = useAuth();
 
   async function handleSubmit() {
     setIsLoading(true);
-    await api
-      .post('/login', { email, password })
-      .then((response) => setToken(response.data))
-      .catch();
+    try {
+      await signIn({ email, password });
+      setHasError(false);
+    } catch (error) {
+      setHasError(true);
+    }
     setIsLoading(false);
   }
 
   return (
     <Stack spacing="6">
+      {hasError && <Alert status="error">Erro de autenticação</Alert>}
       <FormControl id="email">
         <FormLabel>E-mail</FormLabel>
         <Input
